@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHS Hot Take Machine v5</title>
+<style>
+:root{
+  --bg:#0b1020; --panel:#151d3a; --panel2:#202a52; --text:#f8f9ff;
+  --muted:#bdc5e6; --pink:#ff5d9e; --yellow:#ffd166; --blue:#6ee7ff;
+  --green:#91f5ad; --purple:#c7a6ff; --orange:#ffb36b; --red:#ff8c7a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; padding:22px;
+  font-family:Inter,Arial,Helvetica,sans-serif; color:var(--text);
+  background:
+    radial-gradient(circle at 15% 8%,rgba(255,93,158,.18),transparent 28%),
+    radial-gradient(circle at 85% 15%,rgba(110,231,255,.14),transparent 28%),
+    linear-gradient(145deg,#070a14,var(--bg));
+}
+.app{
+  width:min(1180px,100%); margin:auto;
+  border:1px solid rgba(255,255,255,.1); border-radius:28px; overflow:hidden;
+  background:rgba(255,255,255,.035); box-shadow:0 24px 70px rgba(0,0,0,.38);
+}
+header{text-align:center;padding:30px 28px 18px}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.19em;text-transform:uppercase;color:var(--yellow)}
+h1{margin:.4rem 0 .45rem;font-size:clamp(2.45rem,7vw,5.1rem);line-height:.94;letter-spacing:-.065em}
+.tagline{max-width:860px;margin:auto;color:var(--muted);font-size:1.05rem;line-height:1.55}
+.notice{
+  margin:18px auto 0; max-width:920px; padding:12px 15px; border-radius:14px;
+  background:rgba(145,245,173,.09); border:1px solid rgba(145,245,173,.24);
+  color:#dfffe7; font-size:.94rem; line-height:1.45;
+}
+.reels{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:18px 20px 8px}
+.reel{
+  min-height:190px; position:relative; border-radius:20px; padding:50px 14px 40px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid rgba(255,255,255,.1);
+}
+.label{
+  position:absolute;top:13px;left:12px;right:12px;color:var(--muted);
+  font-size:.68rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase
+}
+.value{font-size:clamp(1.15rem,2.25vw,1.85rem);font-weight:900;line-height:1.12;letter-spacing:-.035em;text-wrap:balance}
+.reel:nth-child(1) .value{color:var(--blue)}
+.reel:nth-child(2) .value{color:var(--pink)}
+.reel:nth-child(3) .value{color:var(--yellow)}
+.reel:nth-child(4) .value{color:var(--green)}
+.reel:nth-child(5) .value{color:var(--purple)}
+.lock{
+  position:absolute;right:10px;bottom:9px;border:0;border-radius:999px;padding:7px 9px;
+  background:rgba(255,255,255,.08);color:var(--muted);font-weight:800;cursor:pointer;font-size:.82rem
+}
+.lock.active{background:rgba(145,245,173,.15);color:var(--green);outline:1px solid rgba(145,245,173,.38)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:20px 20px 10px}
+button{
+  font:inherit;border:0;border-radius:14px;padding:13px 18px;font-weight:900;
+  cursor:pointer;transition:transform .15s ease,filter .15s ease
+}
+button:hover{transform:translateY(-2px);filter:brightness(1.05)}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.primary{background:linear-gradient(135deg,var(--pink),#ff7b5c);color:#fff;min-width:210px}
+.secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.09)}
+.card{
+  margin:14px 20px 0;padding:22px;border-radius:20px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)
+}
+.card h2{margin:0 0 12px;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase}
+.challenge h2{color:var(--purple)}
+.ladder h2{color:var(--orange)}
+.workshop h2{color:var(--green)}
+.challenge-text{margin:0;font-size:clamp(1.2rem,2.2vw,1.8rem);font-weight:900;line-height:1.3}
+.questions{margin:12px 0 0;padding-left:1.25rem;color:var(--muted);line-height:1.55}
+.ladder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.step{
+  min-height:165px;padding:18px;border-radius:16px;
+  background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.08)
+}
+.step-label{font-size:.72rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.step-text{font-size:clamp(1.1rem,1.8vw,1.45rem);font-weight:850;line-height:1.3;margin:0}
+.step:nth-child(1) .step-text{color:#dfe5ff}
+.step:nth-child(2) .step-text{color:var(--yellow)}
+.step:nth-child(3) .step-text{color:var(--green)}
+.ladder-controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;margin-bottom:7px;font-size:.78rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+textarea{
+  width:100%;min-height:105px;resize:vertical;border-radius:13px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);
+  color:var(--text);padding:12px;font:inherit;line-height:1.45
+}
+textarea:focus{outline:3px solid rgba(255,209,102,.65);outline-offset:2px}
+.status{text-align:center;min-height:25px;color:var(--green);font-weight:800;padding:12px}
+footer{text-align:center;color:#8f98bf;font-size:.86rem;padding:0 20px 24px;line-height:1.45}
+.spin{animation:spin .44s ease}
+@keyframes spin{
+  0%{transform:translateY(-13px);filter:blur(6px);opacity:.2}
+  60%{transform:translateY(7px);filter:blur(2px);opacity:.75}
+  100%{transform:translateY(0);filter:blur(0);opacity:1}
+}
+@media(max-width:1050px){.reels{grid-template-columns:repeat(2,1fr)}.reel:last-child{grid-column:1/-1}}
+@media(max-width:760px){.ladder-grid,.grid{grid-template-columns:1fr}}
+@media(max-width:600px){body{padding:10px}.reels{grid-template-columns:1fr}.reel:last-child{grid-column:auto}.reel{min-height:145px}}
+@media print{
+ body{background:#fff;color:#000}.app{box-shadow:none;border:1px solid #aaa}
+ .reel,.card,.step{background:#fff;color:#000;border:1px solid #bbb}
+ .value,.challenge-text,.step-text,textarea{color:#000!important}
+ .controls,.lock,.ladder-controls,.status,footer,.notice{display:none}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+  <div class="eyebrow">Manurewa High School • Level 3 Writing Portfolio</div>
+  <h1>🎰 Hot Take Machine</h1>
+  <p class="tagline">Generate an idea, watch it get sharper, then decide what is worth keeping. The goal is not to copy the machine. The goal is to beat it.</p>
+  <div class="notice"><strong>Assessment-safe use:</strong> these examples model planning-level thinking only. Students must rewrite, challenge or replace them using their own knowledge, examples and voice.</div>
+</header>
+
+<section class="reels">
+  <article class="reel">
+    <div class="label">🎯 Topic</div>
+    <div class="value" id="topic"></div>
+    <button class="lock" data-key="topic">🔓 Lock</button>
+  </article>
+  <article class="reel">
+    <div class="label">🌶 Angle</div>
+    <div class="value" id="angle"></div>
+    <button class="lock" data-key="angle">🔓 Lock</button>
+  </article>
+  <article class="reel">
+    <div class="label">🧠 Bigger idea</div>
+    <div class="value" id="bigIdea"></div>
+    <button class="lock" data-key="bigIdea">🔓 Lock</button>
+  </article>
+  <article class="reel">
+    <div class="label">🎭 Voice</div>
+    <div class="value" id="voice"></div>
+    <button class="lock" data-key="voice">🔓 Lock</button>
+  </article>
+  <article class="reel">
+    <div class="label">📝 Text type</div>
+    <div class="value" id="textType"></div>
+    <button class="lock" data-key="textType">🔓 Lock</button>
+  </article>
+</section>
+
+<section class="controls">
+  <button class="primary" id="spin">🎲 Spin unlocked reels</button>
+  <button class="secondary" id="unlock">🔓 Unlock all</button>
+  <button class="secondary" id="copy">📋 Copy planning card</button>
+  <button class="secondary" id="print">🖨 Print / save PDF</button>
+</section>
+
+<section class="card challenge">
+  <h2>Your writing challenge</h2>
+  <p class="challenge-text" id="challenge"></p>
+  <ul class="questions" id="questions"></ul>
+</section>
+
+<section class="card ladder">
+  <h2>Idea ladder: watch the thinking sharpen</h2>
+  <div class="ladder-grid">
+    <div class="step">
+      <div class="step-label">1. Obvious</div>
+      <p class="step-text" id="level1"></p>
+    </div>
+    <div class="step">
+      <div class="step-label">2. More interesting</div>
+      <p class="step-text" id="level2"></p>
+    </div>
+    <div class="step">
+      <div class="step-label">3. Sharper hot take</div>
+      <p class="step-text" id="level3"></p>
+    </div>
+  </div>
+  <div class="ladder-controls">
+    <button class="secondary" id="sharpen">🔥 Sharpen again</button>
+    <button class="secondary" id="swap">🔄 Try a different angle</button>
+  </div>
+</section>
+
+<section class="card workshop">
+  <h2>Now beat the machine</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="mine">My strongest version</label>
+      <textarea id="mine" placeholder="Write a stronger, more truthful version in your own voice."></textarea>
+    </div>
+    <div class="field">
+      <label for="why">Why mine is better</label>
+      <textarea id="why" placeholder="What did you make more specific, complex, convincing or striking?"></textarea>
+    </div>
+    <div class="field">
+      <label for="evidence">A story, image, example or text connection</label>
+      <textarea id="evidence" placeholder="What concrete detail could help sustain this idea?"></textarea>
+    </div>
+    <div class="field">
+      <label for="purpose">Audience and intended effect</label>
+      <textarea id="purpose" placeholder="Who is the reader, and what do you want them to think, feel or question?"></textarea>
+    </div>
+  </div>
+</section>
+
+<div class="status" id="status" role="status" aria-live="polite"></div>
+<footer>Locks stay locked. “Sharpen again” changes only the idea ladder. The best result should still be the student’s own version.</footer>
+</main>
+
+<script>
+const bank={
+topic:[
+"Whānau and family expectations","Being judged by where you come from","The way South Auckland is talked about",
+"Language loss and language revival","Cultural pride","Belonging to more than one culture","Names and identity",
+"Church, faith and community","What home means","Housing insecurity","Rent and the cost of living",
+"Working while still at school","Caring for younger siblings or relatives","School uniforms","Attendance",
+"Exams and assessment pressure","Being labelled ‘lazy’","The pressure to be successful","University as the ‘only’ pathway",
+"Trades and practical intelligence","Sport and sacrifice","Injury and identity","Team culture","Body image",
+"Beauty standards","Social media","Phones and attention","AI and creativity","Gaming","Friendship loyalty",
+"Dating and respect","Mental health language","Masculinity","Femininity","Growing up too quickly",
+"Migration and starting again","The stories our grandparents carry","Indigenous stories told by Indigenous people",
+"Colonisation and what is still lost","Reclaiming culture","Racism hidden behind politeness","The white saviour idea",
+"Education and power","Who gets believed","Who gets represented","Climate anxiety","Public transport",
+"Fast fashion","Food, memory and culture","Music as identity","Hair and self-expression","The future of Aotearoa"
+],
+angle:[
+"What have we normalised?","Who benefits from the way things are?","What are adults misunderstanding?",
+"What looks helpful but is not enough?","What is being celebrated without acknowledging its cost?",
+"What is everyone pretending not to notice?","What have we forgotten how to value?","Whose voice is missing?",
+"What is called ‘choice’ but does not feel like a real choice?","What sounds positive but hides pressure?",
+"What do people outside the community get wrong?","What are young people expected to carry quietly?",
+"What has become a performance?","What would change if care came before profit?","What does success cost?",
+"What is inherited across generations?","What should make us angry?","What gives us hope anyway?"
+],
+bigIdea:[
+"belonging","mana and dignity","community responsibility","identity","power","fairness","freedom","care",
+"collective wellbeing","memory","colonisation","resilience","visibility","voice","home","success","sacrifice",
+"expectation","inequality","healing","cultural survival","choice","trust","hope","shame","pride","safety",
+"attention","authenticity","who gets to define what is normal","what we owe one another","the future we are building"
+],
+voice:[
+"funny, then serious","controlled anger","warm and hopeful","sharp and direct","reflective","slightly sarcastic",
+"quietly powerful","personal but not private","uncomfortable and challenging","honest and conversational"
+],
+textType:[
+"column","personal essay","editorial","film review","episodic narrative","speech","feature article","open letter"
+]
+};
+
+const locked={topic:false,angle:false,bigIdea:false,voice:false,textType:false};
+const get=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+let ladderVariant=0;
+
+function animate(el){el.classList.remove("spin");void el.offsetWidth;el.classList.add("spin");}
+
+function topicLower(t){return t.charAt(0).toLowerCase()+t.slice(1);}
+
+function makeLadder(topic,idea,variant){
+  const t=topicLower(topic);
+  const sets=[
+    [
+      `${topic} matters.`,
+      `${topic} is not only about ${t}; it is about who gets to keep their ${idea}.`,
+      `We keep treating ${t} like a personal issue, when it is really a public argument about ${idea}.`
+    ],
+    [
+      `${topic} can be difficult.`,
+      `The hardest part of ${t} is not always what happens. It is what people learn to accept.`,
+      `The danger of ${t} is not that it shocks us. It is that it can make the loss of ${idea} feel normal.`
+    ],
+    [
+      `${topic} affects people.`,
+      `${topic} reveals who is expected to carry the cost quietly.`,
+      `Every time we call ${t} “normal,” someone else is being asked to pay for it with their ${idea}.`
+    ],
+    [
+      `${topic} should change.`,
+      `Changing ${t} requires more than good intentions.`,
+      `We do not need kinder language around ${t}; we need a different distribution of ${idea}.`
+    ],
+    [
+      `${topic} is misunderstood.`,
+      `People talk about ${t} as if the problem begins with individuals.`,
+      `${topic} is not proof that people are failing. It may be proof that the system has decided whose ${idea} matters.`
+    ]
+  ];
+  return sets[variant%sets.length];
+}
+
+function updateLadder(){
+  const vals=makeLadder(get("topic").textContent,get("bigIdea").textContent,ladderVariant);
+  get("level1").textContent=vals[0];
+  get("level2").textContent=vals[1];
+  get("level3").textContent=vals[2];
+  [get("level1"),get("level2"),get("level3")].forEach(animate);
+}
+
+function updateChallenge(){
+  get("challenge").textContent=
+    `Create a ${get("textType").textContent} about “${get("topic").textContent}”. Explore the question “${get("angle").textContent}” Connect it to ${get("bigIdea").textContent}, using a ${get("voice").textContent} voice.`;
+
+  const qsets=[
+    ["What is the contradiction?","Who carries the cost?","What detail would make the reader see it?"],
+    ["What would someone disagree with?","What is the deeper issue?","What story could carry the idea?"],
+    ["Whose voice is usually missing?","What is at stake?","How could the ending return to the opening?"],
+    ["What has been left unsaid?","What would make this specific to Aotearoa or your community?","What could make it command attention?"]
+  ];
+  get("questions").innerHTML=pick(qsets).map(q=>`<li>${q}</li>`).join("");
+}
+
+function spin(){
+  Object.keys(locked).forEach(key=>{
+    if(!locked[key]){
+      get(key).textContent=pick(bank[key]);
+      animate(get(key));
+    }
+  });
+  ladderVariant=Math.floor(Math.random()*5);
+  updateChallenge();
+  updateLadder();
+  get("status").textContent="";
+}
+
+document.querySelectorAll(".lock").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const key=btn.dataset.key;
+    locked[key]=!locked[key];
+    btn.classList.toggle("active",locked[key]);
+    btn.textContent=locked[key]?"🔒 Locked":"🔓 Lock";
+    btn.setAttribute("aria-pressed",String(locked[key]));
+  });
+});
+
+get("spin").addEventListener("click",spin);
+
+get("unlock").addEventListener("click",()=>{
+  Object.keys(locked).forEach(k=>locked[k]=false);
+  document.querySelectorAll(".lock").forEach(btn=>{
+    btn.classList.remove("active");btn.textContent="🔓 Lock";btn.setAttribute("aria-pressed","false");
+  });
+  get("status").textContent="All reels unlocked.";
+});
+
+get("sharpen").addEventListener("click",()=>{
+  ladderVariant=(ladderVariant+1)%5;
+  updateLadder();
+});
+
+get("swap").addEventListener("click",()=>{
+  get("angle").textContent=pick(bank.angle);
+  animate(get("angle"));
+  updateChallenge();
+  ladderVariant=Math.floor(Math.random()*5);
+  updateLadder();
+});
+
+get("copy").addEventListener("click",async()=>{
+  const text=`MHS HOT TAKE PLANNING CARD
+
+TOPIC:
+${get("topic").textContent}
+
+ANGLE:
+${get("angle").textContent}
+
+BIGGER IDEA:
+${get("bigIdea").textContent}
+
+VOICE:
+${get("voice").textContent}
+
+TEXT TYPE:
+${get("textType").textContent}
+
+MACHINE EXAMPLES — DO NOT COPY:
+1. ${get("level1").textContent}
+2. ${get("level2").textContent}
+3. ${get("level3").textContent}
+
+MY STRONGEST VERSION:
+${get("mine").value}
+
+WHY MINE IS BETTER:
+${get("why").value}
+
+STORY / IMAGE / EXAMPLE:
+${get("evidence").value}
+
+AUDIENCE AND EFFECT:
+${get("purpose").value}`;
+  try{await navigator.clipboard.writeText(text);}
+  catch(e){
+    const area=document.createElement("textarea");area.value=text;
+    document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();
+  }
+  get("status").textContent="Planning card copied — paste it into Teams.";
+});
+
+get("print").addEventListener("click",()=>window.print());
+
+spin();
+</script>
+</body>
+</html>
